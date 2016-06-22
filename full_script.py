@@ -6,9 +6,9 @@ import pandas as pd
 import pickle
 import os
 
-modelFullPath = '/Users/MelanieAppleby/ds/metis/metisgh/project5_final/output_graph.pb'
-labelsFullPath = '/Users/MelanieAppleby/ds/metis/metisgh/project5_final/output_labels.txt'
-NUM_CLUSTERS = 100
+modelFullPath = '/Users/MelanieAppleby/ds/metis/metisgh/project5_final/upload_file_python/src/output_graph.pb'
+labelsFullPath = '/Users/MelanieAppleby/ds/metis/metisgh/project5_final/upload_file_python/src/output_labels.txt'
+NUM_CLUSTERS = 30
 
 def create_graph():
     """Creates a graph from saved GraphDef file and returns a saver."""
@@ -34,6 +34,7 @@ def run_inference_on_image(imagePath):
     with tf.Session() as sess:
 
         softmax_tensor = sess.graph.get_tensor_by_name('final_result:0')
+        # print sess.run(softmax_tensor.get_shape())
         predictions = sess.run(softmax_tensor,
                                {'DecodeJpeg/contents:0': image_data})
         predictions = np.squeeze(predictions)
@@ -104,7 +105,7 @@ def load_pickle(name):
     """
     Loads the given object from its pickle and return it
     """
-    with open('pickle/' + name + '.pickle', 'rb') as handle:
+    with open('upload_file_python/src/pickle/' + name + '.pickle', 'rb') as handle:
         obj = pickle.load(handle)
     return obj
 
@@ -115,27 +116,29 @@ def main():
 	## Classify image ##
 	cat1, cat2 = run_inference_on_image(path_to_image)
 	cat1 = reformat(cat1)
-	print 'This is a ', cat1
+	print 'This is ', cat1
 	# if cat2 != None:
 	# 	cat2 = reformat(cat2)
 
 	## Return similar photos ##
-	path_to_image_folder = '/Users/MelanieAppleby/ds/metis/metisgh/project5_final/products_test'
+	path_to_image_folder = '/Users/MelanieAppleby/ds/metis/metisgh/project5_final/upload_file_python/src/static/products'
 	keypoints = find_keypoints(path_to_image)
 	
 	# Category 1 #
 	kmeans = load_pickle(cat1 + '_kmeans')
 	labels = get_labels(keypoints, kmeans)
 	hist = get_histogram(labels)
+	print hist
 	knn = load_pickle(cat1 + '_knn')
 	dist, ind = get_similar_images(hist, knn, k = 10)
-	images = os.listdir(path_to_image_folder + '/' + cat1)[1:]
+	images = os.listdir(path_to_image_folder + '/' + cat1)
+	images = [x for x in images if x != '.DS_Store']
 	# top_10_dists = zip(range(10), dist[:10])
 	# print 'Image, Distance'
 	# for i in range(10):
 	# 	print images[ind[i]], dist[i]
 
-	# Category 2 # 
+	# Category 2 #
 	# if cat2 != None:
 	# 	kmeans2 = load_pickle(cat2 + '_kmeans')
 	# 	labels2 = get_labels(keypoints, kmeans2)
