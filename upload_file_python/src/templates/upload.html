@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Find It</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+    <style>
+    * {
+        box-sizing: border-box;
+    }
+    .container {
+        height: 50vh;
+        padding-top: 50px;
+    }
+
+    .boxed {
+        width: 100%;
+        height: 60px;
+        position: relative;
+        top: 20px;
+        background-color: black;
+        letter-spacing: 3px;
+        font-size:120%;
+    }
+
+    .header-text {
+        color: white; 
+        font-size: 300%; 
+        font-family: didot; 
+        position: relative; 
+        top: 6px;
+    }
+
+    .question {
+        font-family: didot;
+        font-size:200%;
+        position: relative;
+    }
+
+    .upload-text {
+        font-family: didot;
+        font-size: 150%;
+        position: relative;
+    }
+
+    .file-chooser-label {
+        position: relative;
+        background-color: black;
+    }
+
+    .file-uploader-label {
+        position: relative;
+        margin-left: 5%;
+        background-color: black;
+    }
+
+    .choose-file-text {
+        color: white;
+        font-family: verdana;
+        font-style: normal;
+        margin: 0px !important;
+    }
+
+    .upload-file-text {
+        color: white;
+        font-family: verdana;
+        font-style: normal;
+        margin: 0px !important;
+    }
+
+    .file-uploader {
+        position: relative;
+        margin-left: 55%;
+        top: -117px;
+    }
+
+    input[type="submit"] {
+        display: none;
+    }
+
+    input[type="file"] {
+        display: none;
+    }
+
+    .image-name {
+        position: relative;
+        text-align: center;
+    }
+
+
+    .uploaded-picture-container {
+        width: 100%;
+        top: -20px;
+    }
+
+    .uploaded-picture {
+        max-width: 300px;
+        max-height: 300px;
+        width: auto;
+        height: auto;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        padding: 15px; 
+        border: 15px solid #bfbfbf;
+    }
+
+    #imageDiv {
+        width: 100%;
+        margin:0 auto;
+        margin-top: 20px;
+        text-align: center;
+        overflow: auto;
+        display: block;
+        list-style:none;
+    }
+
+    .image-block {
+        float: left;
+        position: relative;
+        height: 420px;
+        width: 25%;
+        padding: 4px;
+    }
+
+    .clickable-image {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .description-text {
+        font-style: normal;
+        text-align: center;
+        font-family: 'HelveticaNeue-Light', 'Helvetica Neue Light', 'Helvetica Neue', Helvetica;
+        margin: 0px !important;
+    }
+
+    form#upload-form {
+        text-align: center;
+        margin-top: -231px;
+    }
+
+
+    </style>
+
+    <div class="boxed text-center">
+        <h3 class='header-text'>FIND IT</h3>
+    </div>
+
+</head>
+
+<body>
+
+<div class="container text-center">
+    <h3 class='question'>What would you like to find?</h3>
+    <p class ='upload-text'><em>Please upload an image of clothing here:<em></p>
+</div>
+
+<form id="upload-form" action="{{ url_for('upload') }}" method="POST" enctype="multipart/form-data">
+    <label for='file-picker' class= 'file-chooser-label'>
+        <p class = "choose-file-text">Choose File</p>
+    </label>
+    <input class="file-chooser" id="file-picker" type="file" name="file" accept="image/*">
+    
+    <label for='upload-button' class= 'file-uploader-label'>
+        <p class = "upload-file-text">Upload</p></label>
+    <input class="file-uploader" type="submit" value="Upload" id="upload-button">
+</form>
+
+<div id='chooser' class='image-name'></div>
+<div id='searching' class='searching-text'></div>
+
+</body>
+
+<div class= 'uploaded-picture-container'>
+    <img class='uploaded-picture' id="uploaded-picture-id" src=" {{url_for('send_image', filename=image_name)}}" onError="this.style.display='none'" onload='get_width()'/>
+</div>
+
+
+<div id="imageDiv" class='image-container'></div>
+<!-- <ul id='imageDiv'></ul> -->
+
+<script>
+
+    function get_width() {
+        var img = document.getElementById("uploaded-picture-id");
+        uploaded_width = img.width;
+        uploaded_height = img.height;
+    }
+
+    $("#file-picker").change(function(){
+        var input = document.getElementById('file-picker');
+        var image = input.files[0].name
+        for (var i=0; i<1; i++) {
+            var ext= input.files[i].name.substring(input.files[i].name.lastIndexOf('.')+1).toLowerCase()
+            if ((ext == 'jpg') || (ext == 'png')) {
+                $("#chooser").append(image);
+            }
+        }
+    });
+
+
+    // $("#upload-button").change(function() {
+    //     $("#searching").append('Searching...');
+    // })
+
+    function scaleSize(maxW, maxH, currW, currH){
+        // console.log(currW, currH)
+        var ratio = currH / currW;
+        if(currW >= maxW) {
+            currW = maxW;
+            currH = currW * ratio;
+        }
+        if(currH >= maxH) {
+            currH = maxH;
+            currW = currH / ratio;
+        }
+        return [Math.round(currW), Math.round(currH)];
+    }
+
+
+    function populateImages(imageUrl, retailer, name, price, retailerUrl) {
+        var block = document.createElement("div");
+        block.className = 'image-block';
+        
+        var img = document.createElement("img");
+        img.src = imageUrl;
+        img.className = 'clickable-image';
+
+        // link to external site
+        var clickableLink = document.createElement("a");
+        clickableLink.href = retailerUrl;
+        clickableLink.target = "_blank";
+        clickableLink.appendChild(img);
+        
+        // add metadata        
+        var description = document.createElement("div");
+
+        var retailerName = document.createElement("p");
+        retailerName.className = 'description-text';
+        var retailerNameText = document.createTextNode(retailer);
+        retailerName.appendChild(retailerNameText);
+        description.appendChild(retailerName);
+
+        var productName = document.createElement("p");
+        productName.className = 'description-text';
+        var productNameText = document.createTextNode(name);
+        productName.appendChild(productNameText);
+        description.appendChild(productName);
+
+        var productPrice = document.createElement("p");
+        productPrice.className = 'description-text';
+        var productPriceText = document.createTextNode('$'+price);
+        productPrice.appendChild(productPriceText);
+        description.appendChild(productPrice);
+        
+        // resize image
+        var actualH;
+        var actualW;
+        var newH;
+        var newW;
+        img.onload = function() {
+            actualW = this.width;
+            actualH = this.height;
+            var newSize = scaleSize(300, 300, actualW, actualH);
+            this.width = newSize[0];
+            this.height = newSize[1];
+            // this.hspace = (300 - this.width);
+            block.appendChild(clickableLink);
+            block.appendChild(description);
+            document.getElementById('imageDiv').appendChild(block);
+        }; 
+    }
+
+    function get_similar_images(image_name) {
+        console.log(image_name)
+        $.ajax({
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            url: "/get_similar",
+            dataType: "json",
+            async: true,
+            data: JSON.stringify({name: image_name}),
+            success: function(data) {
+                var image_list = data.images;
+                var category = data.category;
+                var retailers = data.retailers;
+                var names = data.names;
+                var prices = data.prices;
+                var urls = data.urls;
+                for (var i=0; i<image_list.length; i++) {
+                    var url = "static/products/"+category+"/"+image_list[i];
+                    populateImages(url, retailers[i], names[i], prices[i], 
+                        urls[i])
+                }
+            },
+            error: function(xhr, status, error) {
+            }
+        });
+    }
+
+    image_name = " {{url_for('send_image', filename=image_name)}}";
+    image_name = image_name.replace('/upload/','').trim();
+    console.log(image_name);
+    get_similar_images(image_name);
+
+</script>
+</html>
