@@ -1,6 +1,6 @@
 # Project Code
 
-This folder contain code essential to the fashion image search tool. 
+This folder contain code essential to the fashion image search tool. <br />
 
 **download_photos.py**: Downloads each image from given shopstyle url and create dictionary with metadata.
 **fashion_image_search.py**: Contains code to perform image search on given query image.
